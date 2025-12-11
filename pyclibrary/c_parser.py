@@ -818,12 +818,16 @@ class CParser(object):
         Operates in memory, does not alter the original files.
 
         """
-        # Create a Regex to match `type name; /// comment` (for instance `float max_regen_current; /// Negative value (A)`)
+        # Create a Regex to match `type name; ///< comment` (for instance `float max_regen_current; ///< Negative value (A)`)
         type_parser = Word(alphanums + "_")
         name_parser = Word(alphanums + "_[]") + FollowedBy(";")
         comment_parser = Regex(r"([^\n]+)")
         attr_expression = (
-            type_parser + name_parser + Suppress(";") + Suppress("///") + comment_parser
+            type_parser
+            + name_parser
+            + Suppress(";")
+            + Suppress("///<")
+            + comment_parser
         )
 
         file_content = self.files[path]
@@ -1842,9 +1846,9 @@ lparen = Literal("(").ignore(quotedString).suppress()
 rparen = Literal(")").ignore(quotedString).suppress()
 
 # Numbers
-int_strip = lambda t: t[0].rstrip("UL")
-hexint = Regex(r"[+-]?\s*0[xX][{}]+[UL]*".format(hexnums)).setParseAction(int_strip)
-decint = Regex(r"[+-]?\s*[0-9]+[UL]*").setParseAction(int_strip)
+int_strip = lambda t: t[0].rstrip("ULul")
+hexint = Regex(r"[+-]?\s*0[xX][{}]+[ULul]*".format(hexnums)).setParseAction(int_strip)
+decint = Regex(r"[+-]?\s*[0-9]+[ULul]*").setParseAction(int_strip)
 integer = hexint | decint
 # The floating regex is ugly but it is because we do not want to match
 # integer to it.
